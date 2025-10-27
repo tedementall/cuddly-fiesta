@@ -9,6 +9,12 @@ object TokenStore {
     private const val KEY_TOKEN = "auth_token"
     private const val KEY_LOGGED = "is_logged_in"
 
+    private var appContext: Context? = null
+
+    fun init(context: Context) {
+        appContext = context.applicationContext
+    }
+
     fun save(context: Context, token: String) {
         context.getSharedPreferences(PREFS, MODE_PRIVATE)
             .edit()
@@ -21,6 +27,8 @@ object TokenStore {
         return context.getSharedPreferences(PREFS, MODE_PRIVATE)
             .getString(KEY_TOKEN, null)
     }
+
+    fun get(): String? = appContext?.let { read(it) }
 
     fun isLoggedIn(context: Context): Boolean {
         return context.getSharedPreferences(PREFS, MODE_PRIVATE)
