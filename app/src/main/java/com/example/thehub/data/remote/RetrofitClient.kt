@@ -1,7 +1,6 @@
 package com.example.thehub.data.remote
 
 import com.example.thehub.BuildConfig
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -10,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private fun baseClient(extra: Interceptor? = null): OkHttpClient {
+    private fun baseClient(vararg extras: okhttp3.Interceptor): OkHttpClient {
         val log = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -21,7 +20,7 @@ object RetrofitClient {
 
         return OkHttpClient.Builder()
             .addInterceptor(log)
-            .apply { if (extra != null) addInterceptor(extra) }
+            .apply { extras.forEach { addInterceptor(it) } }
             // timeouts útiles para upload de imágenes
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
@@ -37,39 +36,27 @@ object RetrofitClient {
             .build()
             .create(XanoAuthApi::class.java)
 
-    fun store(tokenProvider: () -> String? = { null }): XanoMainApi =
+    fun store(vararg interceptors: okhttp3.Interceptor): XanoMainApi =
         Retrofit.Builder()
             .baseUrl(ensureSlash(BuildConfig.XANO_STORE_BASE))
             .addConverterFactory(GsonConverterFactory.create())
-            .client(
-                baseClient(Interceptor { chain ->
-                    val t = tokenProvider()
-                    val req = if (!t.isNullOrBlank()) {
-                        chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer $t")
-                            .build()
-                    } else chain.request()
-                    chain.proceed(req)
-                })
-            )
+            .client(baseClient(*interceptors))
             .build()
             .create(XanoMainApi::class.java)
 
-    fun upload(tokenProvider: () -> String? = { null }): UploadService =
+    fun user(vararg interceptors: okhttp3.Interceptor): UserApi =
+        Retrofit.Builder()
+            .baseUrl(ensureSlash(BuildConfig.XANO_AUTH_BASE))
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(baseClient(*interceptors))
+            .build()
+            .create(UserApi::class.java)
+
+    fun upload(vararg interceptors: okhttp3.Interceptor): UploadService =
         Retrofit.Builder()
             .baseUrl(ensureSlash(BuildConfig.XANO_STORE_BASE))
             .addConverterFactory(GsonConverterFactory.create())
-            .client(
-                baseClient(Interceptor { chain ->
-                    val t = tokenProvider()
-                    val req = if (!t.isNullOrBlank()) {
-                        chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer $t")
-                            .build()
-                    } else chain.request()
-                    chain.proceed(req)
-                })
-            )
+            .client(baseClient(*interceptors))
             .build()
             .create(UploadService::class.java)
 

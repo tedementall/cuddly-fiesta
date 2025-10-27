@@ -25,6 +25,9 @@
     <string name="cart_placeholder_subtitle">Tu carrito estará disponible próximamente.</string>
     <string name="profile_placeholder_title">Perfil</string>
     <string name="profile_placeholder_subtitle">Tu perfil estará disponible próximamente.</string>
+    <string name="profile_title">Tu perfil</string>
+    <string name="profile_retry">Reintentar</string>
+    <string name="profile_avatar_content_description">Avatar del usuario</string>
 
     <string name="settings_edit_profile_coming_soon">Editar perfil (próximamente)</string>
     <string name="settings_notifications_coming_soon">Notificaciones (próximamente)</string>
